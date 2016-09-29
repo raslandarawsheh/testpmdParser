@@ -29,7 +29,7 @@ char_to_value(char c){
 	return 0xff; 
 }
 int
-parse_int(const char *str, struct parse_output *out){
+parse_int (const char *str, struct parse_output *out){
 	if (!str)
 		return -1;
 	int idx = 0, len = 0;
@@ -44,15 +44,15 @@ parse_int(const char *str, struct parse_output *out){
 			if (!hex){
 				hex = 1;
 				if (len != 1 &&
-					str[len -1] != '0')
+					str[len - 1] != '0')
 					return -1;
 				continue;
 			}
 		}
-		if (c == '/' || c == '-'){
+		if (c == '/' || c == '-') {
 			printf("ranges\n");
 			idx = len;
-			if (hex){
+			if (hex) {
 			len += 2;
 			if (!str[len - 1] || !str[len] ||
 				(str[len - 1] != '0' && str[len] != 'x'))
@@ -66,19 +66,19 @@ parse_int(const char *str, struct parse_output *out){
 	if (!out)
 		return len;
 	printf("%s\n", str);	
-	int base = ( hex ? 16 : 10);
+	int base = (hex ? 16 : 10);
 	int value1;
 	int value = strtol(str, NULL, base);
-	if(idx)
-		value1 = strtol(&str[idx + 1 ], NULL, base);
+	if (idx)
+		value1 = strtol(&str[idx + 1], NULL, base);
 		printf("value1 = %d\n", value1);
 	printf("value = %d\nout->size =%d\n", value, out->size);
 	if ((out->size != 1 && out->size != 2 &&
 		out->size != 4 && out->size != 8) ||
 		(hex && len <= 2))
 		return -1;
-	if(out->desc)
-		memcpy(out->desc, &value, out->size); 
+	if (out->desc)
+		memcpy(out->desc, &value, out->size);
 	return len;
 }
 int
