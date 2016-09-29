@@ -29,7 +29,7 @@ char_to_value(char c){
 	return 0xff; 
 }
 int
-parse_int (const char *str, struct parse_output *out){
+parse_int (const char *str, struct parse_output *out) {
 	if (!str)
 		return -1;
 	int idx = 0, len = 0;
@@ -82,15 +82,15 @@ parse_int (const char *str, struct parse_output *out){
 	return len;
 }
 int
-parse_ipv4(const char *str, struct parse_output *out){
+parse_ipv4(const char *str, struct parse_output *out) {
 	return 0;
 }
 int
-parse_ipv6(const char *str, struct parse_output *out){
+parse_ipv6(const char *str, struct parse_output *out) {
 	return 0;
 }
 int
-parse_mac(const char *str, struct parse_output *out){
+parse_mac(const char *str, struct parse_output *out) {
 	return 0;
 }
 
