@@ -17,7 +17,9 @@ main(int argc, char ** argv){
 		.limit = buf[2],
 	};
 	printf("len = %d\n", parse_int(argv[2], &p));
-	printf("p->desc = %d\n", *(uint32_t *)p.desc);
+	printf("p.desc = %u\n", *(uint32_t *)p.desc);
+	printf("p.mask = %u\n", *(uint32_t *)p.mask);
+	printf("p.limit = %u\n", *(uint32_t *)p.limit);
 	return 0;
 }
 
@@ -64,18 +66,36 @@ parse_int (const char *str, struct parse_output *out) {
 	if (!out)
 		return len;
 	printf("%s\n", str);
-	int limit = -1;
-	int desc = strtol(str, NULL, 0);
-	if (idx)
-		limit = strtol(&str[idx + 1], NULL, 0);
-		printf("limit = %d\n", limit);
+	uint64_t limit = -1 ,tmp = -1;
+	uint64_t desc = strtol(str, NULL, 0);
+
 	printf("desc = %d\nout->size =%d\n", desc, out->size);
 	if ((out->size != 1 && out->size != 2 &&
 		out->size != 4 && out->size != 8) ||
-		(hex && len <= 2))
+		(hex && len <= 2) || (sizeof(desc) < out->size))
 		return -1;
 	if (out->desc)
 		memcpy(out->desc, &desc, out->size);
+	if (idx) {
+		limit = strtol(&str[idx + 1], NULL, 0);
+		if (out->mask)
+			if (str[idx] == '-')
+				memcpy(out->mask, &tmp, out->size);
+			else{
+				memcpy(out->mask, &limit, out->size);
+			}
+		if (out->limit)
+                	memcpy(out->limit, &limit, out->size);
+	}
+	else{
+		if (out->mask)
+			memcpy(out->mask, &tmp, out->size);
+		if (out->limit)
+			memcpy(out->limit, &desc, out->size);
+	}
+	if (out->limit)
+		memcpy(out->limit, &limit, out->size);
+	
 	return len;
 }
 int
