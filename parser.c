@@ -48,7 +48,7 @@ parse_int (const char *str, struct parse_output *out) {
 				hex = 1;
 				if (len < 1 ||
 					str[len - 1] != '0' ||
-					!str[len + 1])
+					(char_to_value(str[len + 1]) ==  0xff))
 					return -1;
 				continue;
 			}
@@ -69,7 +69,7 @@ parse_int (const char *str, struct parse_output *out) {
 	if (idx)
 		limit = strtol(&str[idx + 1], NULL, 0);
 		printf("limit = %d\n", limit);
-	printf("value = %d\nout->size =%d\n", desc, out->size);
+	printf("desc = %d\nout->size =%d\n", desc, out->size);
 	if ((out->size != 1 && out->size != 2 &&
 		out->size != 4 && out->size != 8) ||
 		(hex && len <= 2))
