@@ -17,7 +17,7 @@ main(int argc, char ** argv){
 		.limit = buf[2],
 	};
 	printf("len = %d\n", parse_int(argv[2], &p));
-	printf("p->desc = %d\n", *(uint32_t*)p.desc);
+	printf("p->desc = %d\n", *(uint32_t *)p.desc);
 	return 0;
 }
 
@@ -43,7 +43,7 @@ parse_int (const char *str, struct parse_output *out) {
 		if (isspace(c) || c == '#')
 			break;
 
-		if (c == 'x') {			
+		if (c == 'x') {
 			if (!hex || idx) {
 				hex = 1;
 				if (len < 1 ||
@@ -75,7 +75,7 @@ parse_int (const char *str, struct parse_output *out) {
 		(hex && len <= 2))
 		return -1;
 	if (out->desc)
-		memcpy(out->desc, &desc, out->size); 
+		memcpy(out->desc, &desc, out->size);
 	return len;
 }
 int
