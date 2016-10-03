@@ -15,8 +15,7 @@ main(int argc, char ** argv){
 		.desc = buf[0],
 		.mask = buf[1],
 		.limit = buf[2],
-	};
-	//printf("parse_output = %d \n%s\n", atoi(argv[1]), argv[2]);
+	};	
 	printf("len = %d\n", parse_int(argv[2], &p));
 	printf("p.desc = %u\n", *(int32_t *)p.desc);
 	printf("p.mask = %u\n", *(int32_t *)p.mask);
@@ -77,22 +76,26 @@ parse_int (const char *str, struct parse_output *out) {
 
 	switch (out->size) {
 		case 1:
-			if ((int8_t)desc > INT8_MAX || (int8_t)desc < INT8_MIN)
+			if ((int8_t)desc > INT8_MAX ||
+				(int8_t)desc < INT8_MIN)
 				return -1;
 			*(int8_t *)out->desc = (int8_t)desc;
 			break;
 		case 2:
-			if ((int16_t)desc > INT16_MAX || (int16_t)desc < INT16_MIN)
-                        	return -1;
+			if ((int16_t)desc > INT16_MAX ||
+				(int16_t)desc < INT16_MIN)
+				return -1;
 			*(int16_t *)out->desc = (int16_t)desc;
 			break;
 		case 4:
-			if ((int32_t)desc > INT32_MAX || (int32_t)desc < INT32_MIN)
+			if ((int32_t)desc > INT32_MAX ||
+				(int32_t)desc < INT32_MIN)
 				return -1;
-			*(int32_t *)out->desc = (int32_t)desc;		
+			*(int32_t *)out->desc = (int32_t)desc;
                         break;
 		case 8:
-			if ((int64_t)desc > INT64_MAX || (int64_t)desc < INT64_MIN)
+			if ((int64_t)desc > INT64_MAX ||
+				(int64_t)desc < INT64_MIN)
 				return -1;
                         *(int64_t *)out->desc = (int64_t)desc;
                         break;
@@ -100,14 +103,14 @@ parse_int (const char *str, struct parse_output *out) {
 			return -1;
 	}
 	errno = 0;
-	end ++;
-	char * newstart = end;
+	end++;
+	char *newstart = end;
 	end = NULL;
 	char tmp1[out->size];
-        for (i=0; i <out->size; i++)
-                tmp1[i] = 0xff;
+        for (i = 0; i < out->size; i++)
+		tmp1[i] = 0xff;
 
-	if (parsed == 'n'){
+	if (parsed == 'n') {
 		if (out->mask)
 			out->mask = tmp1;
 		if (out->limit)
@@ -121,22 +124,26 @@ parse_int (const char *str, struct parse_output *out) {
 
 	switch (out->size) {
 		case 1:
-			if ((int8_t)limit > INT8_MAX || (int8_t)limit < INT8_MIN)
+			if ((int8_t)limit > INT8_MAX ||
+				(int8_t)limit < INT8_MIN)
 				return -1;
 			*(int8_t *)tmp = (int8_t)limit;
 			break;
 		case 2:
-			if ((int16_t)limit > INT16_MAX || (int16_t)limit < INT16_MIN)
+			if ((int16_t)limit > INT16_MAX ||
+				(int16_t)limit < INT16_MIN)
 				return -1;
 			*(int16_t *)tmp = (int16_t)limit;
 			break;
 		case 4:
-			if ((int32_t)limit > INT32_MAX || (int32_t)limit < INT32_MIN)
+			if ((int32_t)limit > INT32_MAX ||
+				(int32_t)limit < INT32_MIN)
 				return -1;
 			*(int32_t *)tmp = (int32_t)limit;
 			break;
 		case 8:
-			if ((int64_t)limit > INT64_MAX || (int64_t)limit < INT64_MIN)
+			if ((int64_t)limit > INT64_MAX ||
+				(int64_t)limit < INT64_MIN)
 				return -1;
 			*(int64_t *)tmp = (int64_t)limit;
 			break;
@@ -163,7 +170,7 @@ parse_int (const char *str, struct parse_output *out) {
 				memcpy(out->limit, out->desc, out->size);
 			break;
 	}
- 
+
 	return len;
 }
 int
