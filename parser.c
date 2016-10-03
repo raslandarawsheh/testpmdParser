@@ -15,7 +15,7 @@ main(int argc, char ** argv){
 		.desc = buf[0],
 		.mask = buf[1],
 		.limit = buf[2],
-	};	
+	};
 	printf("len = %d\n", parse_int(argv[2], &p));
 	printf("p.desc = %u\n", *(int32_t *)p.desc);
 	printf("p.mask = %u\n", *(int32_t *)p.mask);
@@ -107,7 +107,7 @@ parse_int (const char *str, struct parse_output *out) {
 	char *newstart = end;
 	end = NULL;
 	char tmp1[out->size];
-        for (i = 0; i < out->size; i++)
+	for (i = 0; i < out->size; i++)
 		tmp1[i] = 0xff;
 
 	if (parsed == 'n') {
