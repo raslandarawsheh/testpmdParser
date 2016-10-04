@@ -37,94 +37,76 @@ char_to_value(char c)
 int
 parse_int (const char *str, struct parse_output *out)
 {
-	int i, len = 0;
+	int i;
 	char *end = NULL;
+	char operation;
 	intmax_t spec;
-	char tmp[out->size];
-	char desc[out->size];
-	char mask[out->size];
-	char limit[out->size];
-	char old = 'n';
+	intmax_t  tmp[2];
+	uintmax_t mask = UINTMAX_MAX ;
 	char *start = (char *)&str[0];
 
-	if (!str || !out)
-		return -1;
-	for (i = 0; i < out->size; i++)
-		mask[i] = 0xff;
-
-
-	while (1) {
+	for (i = 0; i < 2; i ++) {
 		errno = 0;
 		spec = strtoimax(start, &end, 0);
 
 		if (errno)
 			return -1;
 
-		if (*end == '/' || *end == '-' ||
-			isspace((char)*end) || !(*end)) {
-			switch (out->size) {
-			case sizeof(int8_t):
-					if (spec > INT8_MAX ||
-						spec < INT8_MIN)
-						return -1;
-					*(int8_t *)tmp = (int8_t)spec;
-					break;
-			case sizeof(int16_t):
-					if (spec > INT16_MAX ||
-						spec < INT16_MIN)
-						return -1;
-					*(int16_t *)tmp = (int16_t)spec;
-					break;
-			case sizeof(int32_t):
-					if (spec > INT32_MAX ||
-						spec < INT32_MIN)
-						return -1;
-					*(int32_t *)tmp = (int32_t)spec;	
-					break;
-			case sizeof(int64_t):
-					if (spec > INT64_MAX ||
-						spec < INT64_MIN)
-						return -1;
-					*(int64_t *)tmp = (int64_t)spec;
-					break;
-			default:
-				return -1;
-			}
-
-			if (*end == '/') {
-				memcpy(desc, tmp, out->size);
-				memcpy(limit, tmp, out->size);
-			} else if (*end == '-') {
-				memcpy(desc, tmp, out->size);
-			} else if (old == '/') {
-				memcpy(mask, tmp, out->size);
+		switch (out->size){
+		case sizeof(int8_t):
+				if (spec > INT8_MAX ||
+					spec < INT8_MIN)
+					return -1;
+				tmp[i] = (int8_t)spec;
 				break;
-			} else if (old == '-') {
-				memcpy(limit, tmp, out->size);
+		case sizeof(int16_t):
+				if (spec > INT16_MAX ||
+					spec < INT16_MIN)
+					return -1;
+				tmp[i] = (int16_t)spec;
 				break;
-			} else if (!(*end) || isspace((char)*end))
+		case sizeof(int32_t):
+				if (spec > INT32_MAX ||
+					spec < INT32_MIN)
+					return -1;
+				tmp[i] = (int32_t)spec;
 				break;
-			old = (*end ? *end : 'n');
-			start = end + 1;
-		} else
+		case sizeof(int64_t):
+				if (spec > INT64_MAX ||
+					spec < INT64_MIN)
+					return -1;
+				tmp[i] = (int64_t)spec;
+				break;
+		default:
 			return -1;
+		}
+		if (isspace((char)*end) || !(*end))
+			break;
+		if (*end != '/' && *end != '-')
+			return -1;
+		start = end + 1;
+		operation = *end;
 	}
-
-	if (old == 'n') {
-		memcpy(desc, tmp, out->size);
-		memcpy(limit, tmp, out->size);
-	}
-
+	
 	if (out->desc)
-		memcpy(out->desc, desc, out->size);
+		memcpy(out->desc, &tmp[0], out->size);
 
-	if (out->mask)
-		memcpy(out->mask, mask, out->size);
+	if (i) {
+		switch (operation) {
+		case '/':
+			memcpy(out->mask, &tmp[1], out->size);
+			memcpy(out->limit, &tmp[0], out->size);
+			break;
+		case '-':
+			memcpy(out->mask, &mask, out->size);
+			memcpy(out->limit, &tmp[1], out->size);
+			break;
+		default:
+			return -1;
+		}
+	}
 
-	if (out->limit)
-		memcpy(out->limit, limit, out->size);
-
-	return end - str;		
+	return end - str;
 }
 int
 parse_ipv4(const char *str, struct parse_output *out) {
