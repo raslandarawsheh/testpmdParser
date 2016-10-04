@@ -42,17 +42,17 @@ parse_int (const char *str, struct parse_output *out)
 	char operation;
 	intmax_t spec;
 	intmax_t  tmp[2];
-	uintmax_t mask = UINTMAX_MAX ;
+	uintmax_t mask = UINTMAX_MAX;
 	char *start = (char *)&str[0];
 
-	for (i = 0; i < 2; i ++) {
+	for (i = 0; i < 2; i++) {
 		errno = 0;
 		spec = strtoimax(start, &end, 0);
 
 		if (errno)
 			return -1;
 
-		switch (out->size){
+		switch (out->size) {
 		case sizeof(int8_t):
 				if (spec > INT8_MAX ||
 					spec < INT8_MIN)
@@ -87,7 +87,7 @@ parse_int (const char *str, struct parse_output *out)
 		start = end + 1;
 		operation = *end;
 	}
-	
+
 	if (out->desc)
 		memcpy(out->desc, &tmp[0], out->size);
 
