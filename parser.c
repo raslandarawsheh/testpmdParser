@@ -94,7 +94,7 @@ parse_int (const char *str, struct parse_output *out)
 	if (i) {
 		switch (operation) {
 		case '/':
-			if (out->mask);
+			if (out->mask)
 				memcpy(out->mask, &tmp[1], out->size);
 			if (out->limit)
 				memcpy(out->limit, &tmp[0], out->size);
