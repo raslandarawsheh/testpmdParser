@@ -94,16 +94,23 @@ parse_int (const char *str, struct parse_output *out)
 	if (i) {
 		switch (operation) {
 		case '/':
-			memcpy(out->mask, &tmp[1], out->size);
-			memcpy(out->limit, &tmp[0], out->size);
+			if (out->mask);
+				memcpy(out->mask, &tmp[1], out->size);
+			if (out->limit)
+				memcpy(out->limit, &tmp[0], out->size);
 			break;
 		case '-':
-			memcpy(out->mask, &mask, out->size);
-			memcpy(out->limit, &tmp[1], out->size);
+			if (out->mask)
+				memcpy(out->mask, &mask, out->size);
+			if (out->limit)
+				memcpy(out->limit, &tmp[1], out->size);
 			break;
 		default:
 			return -1;
 		}
+	} else {
+		if (out->limit)
+			memcpy(out->limit, &tmp[0], out->size);	
 	}
 
 	return end - str;
