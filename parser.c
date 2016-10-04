@@ -10,8 +10,8 @@ main(int argc, char ** argv){
 		return 1;
 	char buf[3][atoi(argv[1])];
 
-	struct parse_output p ={
-		.size = 4,
+	struct parse_output p = {
+		.size = sizeof(buf[0]),
 		.desc = buf[0],
 		.mask = buf[1],
 		.limit = buf[2],
@@ -37,8 +37,6 @@ char_to_value(char c)
 int
 parse_int (const char *str, struct parse_output *out)
 {
-	if (!str || !out)
-		return -1;
 	int i, len = 0;
 	char *end = NULL;
 	intmax_t spec;
@@ -47,10 +45,13 @@ parse_int (const char *str, struct parse_output *out)
 	char mask[out->size];
 	char limit[out->size];
 	char old = 'n';
+	char *start = (char *)&str[0];
+
+	if (!str || !out)
+		return -1;
 	for (i = 0; i < out->size; i++)
 		mask[i] = 0xff;
 
-	char *start = (char *)&str[0];
 
 	while (1) {
 		errno = 0;
@@ -78,8 +79,7 @@ parse_int (const char *str, struct parse_output *out)
 					if (spec > INT32_MAX ||
 						spec < INT32_MIN)
 						return -1;
-					*(int32_t *)tmp = (int32_t)spec;
-					printf("tmp = %d\n", *(int32_t *)tmp);
+					*(int32_t *)tmp = (int32_t)spec;	
 					break;
 			case sizeof(int64_t):
 					if (spec > INT64_MAX ||
