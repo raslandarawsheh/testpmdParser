@@ -60,7 +60,7 @@ parse_int (const char *str, struct parse_output *out)
 			return -1;
 
 		if (*end == '/' || *end == '-' ||
-			isspace((char)*end) || !(*end) ) {
+			isspace((char)*end) || !(*end)) {
 			switch (out->size) {
 			case sizeof(int8_t):
 					if (spec > INT8_MAX ||
@@ -95,7 +95,7 @@ parse_int (const char *str, struct parse_output *out)
 				memcpy(desc, tmp, out->size);
 				memcpy(limit, tmp, out->size);
 			} else if (*end == '-') {
-					memcpy(desc, tmp, out->size);
+				memcpy(desc, tmp, out->size);
 			} else if (old == '/') {
 				memcpy(mask, tmp, out->size);
 				break;
