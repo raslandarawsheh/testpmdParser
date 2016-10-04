@@ -24,7 +24,8 @@ main(int argc, char ** argv){
 }
 
 int
-char_to_value(char c){
+char_to_value(char c)
+{
 	if (c >= '0' && c <= '9')
 		return c - '0';
 	if (c >= 'a' && c <='f')
@@ -34,144 +35,94 @@ char_to_value(char c){
 	return 0xff; 
 }
 int
-parse_int (const char *str, struct parse_output *out) {
-	if (!str)
+parse_int (const char *str, struct parse_output *out)
+{
+	if (!str || !out)
 		return -1;
-	int idx = 0, len = 0;
-	char c, rng;
-	int hex = 0;
-
- 	for (len =0; str[len]; len++){
-		c = str[len];
-		if (isspace(c) || c == '#')
-			break;
-
-		if ((c == '/' || c == '-' || c == 'x') && len > 0)
-			continue;
-
-		if (char_to_value(c) == 0xff)
-			return -1;
-	}
-
-	if (!len)
-		return -1;
-
+	int i, len = 0;
 	char *end = NULL;
-	int i;
-	errno = 0;
-	intmax_t desc = strtoimax(str, &end, 0);
+	intmax_t spec;
+	char tmp[out->size];
+	char desc[out->size];
+	char mask[out->size];
+	char limit[out->size];
+	char old = 'n';
+        for (i = 0; i < out->size; i++)
+               	mask[i] = 0xff;
 
-	char parsed;
-	if (errno || !out || !out->desc)
-		return len;
+	char *start = (char*)&str[0];
+	printf("%d, %d, %d, %d, %d\n",out->size , sizeof(int8_t), sizeof(int16_t), sizeof(int32_t), sizeof(int64_t));
+	while (1) {
+		errno = 0;
+		spec = strtoimax(start, &end, 0);
+		/*if (!(*end) || isspace((char)*end) || *end == '#')
+			break;*/
 
-	if (!end || !(*end) || isspace((char)*end) || *end == '#')
-		parsed = 'n';
-	else if (*end == '/')
-		parsed = 'm';
-	else if (*end == '-')
-		parsed = 'r';
-	else
-		return -1;
+		if (*end == '/' || *end == '-' || isspace((char)*end) || !(*end) ) {
+			switch (out->size) {
+				case sizeof(int8_t):
+						if (spec > INT8_MAX ||
+							spec < INT8_MIN)
+							return -1;
+						*(int8_t *)tmp = (int8_t)spec;
+						break;
+				case sizeof(int16_t):
+						if (spec > INT16_MAX ||
+							spec < INT16_MIN)
+							return -1;
+						*(int16_t *)tmp = (int16_t)spec;
+						break;
+				case sizeof(int32_t):
+						if (spec > INT32_MAX ||
+							spec < INT32_MIN)
+							return -1;
+						*(int32_t *)tmp = (int32_t)spec;
+						printf("tmp = %d\n", *(int32_t *)tmp);
+						break;
+				case sizeof(int64_t):
+						if (spec > INT64_MAX ||
+							spec < INT64_MIN)
+							return -1;
+						*(int64_t *)tmp = (int64_t)spec;
+						break;
+				default:
+					return -1;
+			}
 
-	switch (out->size) {
-		case 1:
-			if ((int8_t)desc > INT8_MAX ||
-				(int8_t)desc < INT8_MIN)
-				return -1;
-			*(int8_t *)out->desc = (int8_t)desc;
-			break;
-		case 2:
-			if ((int16_t)desc > INT16_MAX ||
-				(int16_t)desc < INT16_MIN)
-				return -1;
-			*(int16_t *)out->desc = (int16_t)desc;
-			break;
-		case 4:
-			if ((int32_t)desc > INT32_MAX ||
-				(int32_t)desc < INT32_MIN)
-				return -1;
-			*(int32_t *)out->desc = (int32_t)desc;
-                        break;
-		case 8:
-			if ((int64_t)desc > INT64_MAX ||
-				(int64_t)desc < INT64_MIN)
-				return -1;
-                        *(int64_t *)out->desc = (int64_t)desc;
-                        break;
-		default: /* in case the size is invailed size */
+			if (*end == '/') {
+				memcpy(desc, tmp, out->size);
+				memcpy(limit, tmp, out->size);
+			} else if (*end == '-')
+					memcpy(desc, tmp, out->size);
+			else if (old == '/') {
+				memcpy(mask, tmp, out->size);
+				break;
+			} else if (old == '-') {
+				memcpy(limit, tmp, out->size);
+				break;
+			} else if (!(*end) || isspace((char)*end))
+				break;
+			old = (*end ? *end : 'n');
+			start = end + 1;
+		} else
 			return -1;
 	}
-	errno = 0;
-	end++;
-	char *newstart = end;
-	end = NULL;
-	char tmp1[out->size];
-	for (i = 0; i < out->size; i++)
-		tmp1[i] = 0xff;
 
-	if (parsed == 'n') {
-		if (out->mask)
-			out->mask = tmp1;
-		if (out->limit)
-			memcpy(out->limit, out->desc, out->size);
-		return len;
-	}
-	intmax_t limit = strtoimax(newstart, &end, 0);
-	if (errno || !end)
-		return len;
-	char tmp[out->size];
-
-	switch (out->size) {
-		case 1:
-			if ((int8_t)limit > INT8_MAX ||
-				(int8_t)limit < INT8_MIN)
-				return -1;
-			*(int8_t *)tmp = (int8_t)limit;
-			break;
-		case 2:
-			if ((int16_t)limit > INT16_MAX ||
-				(int16_t)limit < INT16_MIN)
-				return -1;
-			*(int16_t *)tmp = (int16_t)limit;
-			break;
-		case 4:
-			if ((int32_t)limit > INT32_MAX ||
-				(int32_t)limit < INT32_MIN)
-				return -1;
-			*(int32_t *)tmp = (int32_t)limit;
-			break;
-		case 8:
-			if ((int64_t)limit > INT64_MAX ||
-				(int64_t)limit < INT64_MIN)
-				return -1;
-			*(int64_t *)tmp = (int64_t)limit;
-			break;
-		default:
-			break;
-	}
-	switch (parsed){
-		case 'm':
-			if (out->mask)
-				memcpy(out->mask, tmp, out->size);
-			if (out->limit)
-				memcpy(out->limit, out->desc, out->size);
-			break;
-		case 'r':
-			if (out->mask)
-				memcpy(out->mask, tmp1, out->size);
-			if (out->limit)
-				memcpy(out->limit, tmp, out->size);
-			break;
-		default:
-			if (out->mask)
-				memcpy(out->mask, tmp1, out->size);
-			if (out->limit)
-				memcpy(out->limit, out->desc, out->size);
-			break;
+	if (old == 'n'){
+		memcpy(desc, tmp, out->size);
+		memcpy(limit, tmp, out->size);
 	}
 
-	return len;
+	if (out->desc)
+		memcpy(out->desc, desc, out->size);
+
+	if (out->mask)
+		memcpy(out->mask, mask, out->size);
+
+	if (out->limit)
+		memcpy(out->limit, limit, out->size);
+
+	return end - str;		
 }
 int
 parse_ipv4(const char *str, struct parse_output *out) {
@@ -185,6 +136,7 @@ int
 parse_mac(const char *str, struct parse_output *out) {
 	return 0;
 }
+
 
 
 
