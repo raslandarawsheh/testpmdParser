@@ -47,54 +47,56 @@ parse_int (const char *str, struct parse_output *out)
 	char mask[out->size];
 	char limit[out->size];
 	char old = 'n';
-        for (i = 0; i < out->size; i++)
-               	mask[i] = 0xff;
+	for (i = 0; i < out->size; i++)
+		mask[i] = 0xff;
 
-	char *start = (char*)&str[0];
-	printf("%d, %d, %d, %d, %d\n",out->size , sizeof(int8_t), sizeof(int16_t), sizeof(int32_t), sizeof(int64_t));
+	char *start = (char *)&str[0];
+
 	while (1) {
 		errno = 0;
 		spec = strtoimax(start, &end, 0);
-		/*if (!(*end) || isspace((char)*end) || *end == '#')
-			break;*/
 
-		if (*end == '/' || *end == '-' || isspace((char)*end) || !(*end) ) {
+		if (errno)
+			return -1;
+
+		if (*end == '/' || *end == '-' ||
+			isspace((char)*end) || !(*end) ) {
 			switch (out->size) {
-				case sizeof(int8_t):
-						if (spec > INT8_MAX ||
-							spec < INT8_MIN)
-							return -1;
-						*(int8_t *)tmp = (int8_t)spec;
-						break;
-				case sizeof(int16_t):
-						if (spec > INT16_MAX ||
-							spec < INT16_MIN)
-							return -1;
-						*(int16_t *)tmp = (int16_t)spec;
-						break;
-				case sizeof(int32_t):
-						if (spec > INT32_MAX ||
-							spec < INT32_MIN)
-							return -1;
-						*(int32_t *)tmp = (int32_t)spec;
-						printf("tmp = %d\n", *(int32_t *)tmp);
-						break;
-				case sizeof(int64_t):
-						if (spec > INT64_MAX ||
-							spec < INT64_MIN)
-							return -1;
-						*(int64_t *)tmp = (int64_t)spec;
-						break;
-				default:
-					return -1;
+			case sizeof(int8_t):
+					if (spec > INT8_MAX ||
+						spec < INT8_MIN)
+						return -1;
+					*(int8_t *)tmp = (int8_t)spec;
+					break;
+			case sizeof(int16_t):
+					if (spec > INT16_MAX ||
+						spec < INT16_MIN)
+						return -1;
+					*(int16_t *)tmp = (int16_t)spec;
+					break;
+			case sizeof(int32_t):
+					if (spec > INT32_MAX ||
+						spec < INT32_MIN)
+						return -1;
+					*(int32_t *)tmp = (int32_t)spec;
+					printf("tmp = %d\n", *(int32_t *)tmp);
+					break;
+			case sizeof(int64_t):
+					if (spec > INT64_MAX ||
+						spec < INT64_MIN)
+						return -1;
+					*(int64_t *)tmp = (int64_t)spec;
+					break;
+			default:
+				return -1;
 			}
 
 			if (*end == '/') {
 				memcpy(desc, tmp, out->size);
 				memcpy(limit, tmp, out->size);
-			} else if (*end == '-')
+			} else if (*end == '-') {
 					memcpy(desc, tmp, out->size);
-			else if (old == '/') {
+			} else if (old == '/') {
 				memcpy(mask, tmp, out->size);
 				break;
 			} else if (old == '-') {
@@ -108,7 +110,7 @@ parse_int (const char *str, struct parse_output *out)
 			return -1;
 	}
 
-	if (old == 'n'){
+	if (old == 'n') {
 		memcpy(desc, tmp, out->size);
 		memcpy(limit, tmp, out->size);
 	}
