@@ -106,6 +106,8 @@ parse_int (const char *str, struct parse_output *out)
 			memcpy(out->limit, &tmp[1], out->size);
 		break;
 	default:
+		if (out->mask)
+			memcpy(out->mask, &mask, out->size);
 		if (out->limit)
 			memcpy(out->limit, &tmp[0], out->size);
 		break;
