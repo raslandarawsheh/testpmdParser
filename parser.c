@@ -39,7 +39,7 @@ parse_int (const char *str, struct parse_output *out)
 {
 	int i;
 	char *end = NULL;
-	char operation;
+	char operation = 0;
 	intmax_t spec;
 	intmax_t  tmp[2];
 	uintmax_t mask = UINTMAX_MAX;
@@ -49,40 +49,41 @@ parse_int (const char *str, struct parse_output *out)
 		errno = 0;
 		spec = strtoimax(start, &end, 0);
 
-		if (errno)
+		if (errno || (end == start))
 			return -1;
 
 		switch (out->size) {
 		case sizeof(int8_t):
-				if (spec > INT8_MAX ||
-					spec < INT8_MIN)
-					return -1;
-				tmp[i] = (int8_t)spec;
-				break;
+			if (spec > INT8_MAX ||
+				spec < INT8_MIN)
+				return -1;
+			tmp[i] = (int8_t)spec;
+			break;
 		case sizeof(int16_t):
-				if (spec > INT16_MAX ||
-					spec < INT16_MIN)
-					return -1;
-				tmp[i] = (int16_t)spec;
-				break;
+			if (spec > INT16_MAX ||
+				spec < INT16_MIN)
+				return -1;
+			tmp[i] = (int16_t)spec;
+			break;
 		case sizeof(int32_t):
-				if (spec > INT32_MAX ||
-					spec < INT32_MIN)
-					return -1;
-				tmp[i] = (int32_t)spec;
-				break;
+			if (spec > INT32_MAX ||
+				spec < INT32_MIN)
+				return -1;
+			tmp[i] = (int32_t)spec;
+			break;
 		case sizeof(int64_t):
-				if (spec > INT64_MAX ||
-					spec < INT64_MIN)
-					return -1;
-				tmp[i] = (int64_t)spec;
-				break;
+			if (spec > INT64_MAX ||
+				spec < INT64_MIN)
+				return -1;
+			tmp[i] = (int64_t)spec;
+			break;
 		default:
 			return -1;
 		}
 		if (isspace((char)*end) || !(*end))
 			break;
-		if (*end != '/' && *end != '-')
+		if ((*end != '/' && *end != ',') ||
+			operation)
 			return -1;
 		start = end + 1;
 		operation = *end;
@@ -91,26 +92,23 @@ parse_int (const char *str, struct parse_output *out)
 	if (out->desc)
 		memcpy(out->desc, &tmp[0], out->size);
 
-	if (i) {
-		switch (operation) {
-		case '/':
-			if (out->mask)
-				memcpy(out->mask, &tmp[1], out->size);
-			if (out->limit)
-				memcpy(out->limit, &tmp[0], out->size);
-			break;
-		case '-':
-			if (out->mask)
-				memcpy(out->mask, &mask, out->size);
-			if (out->limit)
-				memcpy(out->limit, &tmp[1], out->size);
-			break;
-		default:
-			return -1;
-		}
-	} else {
+	switch (operation) {
+	case '/':
+		if (out->mask)
+			memcpy(out->mask, &tmp[1], out->size);
 		if (out->limit)
-			memcpy(out->limit, &tmp[0], out->size);	
+			memcpy(out->limit, &tmp[0], out->size);
+		break;
+	case ',':
+		if (out->mask)
+			memcpy(out->mask, &mask, out->size);
+		if (out->limit)
+			memcpy(out->limit, &tmp[1], out->size);
+		break;
+	default:
+		if (out->limit)
+			memcpy(out->limit, &tmp[0], out->size);
+		break;
 	}
 
 	return end - str;
